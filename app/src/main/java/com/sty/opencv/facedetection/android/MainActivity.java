@@ -1,6 +1,7 @@
 package com.sty.opencv.facedetection.android;
 
 import android.Manifest;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,10 +12,13 @@ import android.widget.TextView;
 
 import com.sty.opencv.facedetection.android.util.PermissionUtils;
 
+import org.opencv.samples.facedetect.FdActivity;
+
 public class MainActivity extends AppCompatActivity {
     private String[] needPermissions = {Manifest.permission.CAMERA};
     private SurfaceView surfaceView;
     private Button btnSwitchCamera;
+    private Button btnDetect;
     private CameraHelper cameraHelper;
 
 
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
         surfaceView = findViewById(R.id.surface_view);
         btnSwitchCamera = findViewById(R.id.btn_switch_camera);
+        btnDetect = findViewById(R.id.btn_detect);
 
         cameraHelper = new CameraHelper(MainActivity.this);
         cameraHelper.setPreviewDisplay(surfaceView.getHolder());
@@ -43,6 +48,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 cameraHelper.switchCamera();
+            }
+        });
+
+        btnDetect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, FdActivity.class));
             }
         });
     }

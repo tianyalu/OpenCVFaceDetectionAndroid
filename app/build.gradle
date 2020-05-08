@@ -12,9 +12,16 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags ""
+//                cppFlags ""
+                //OpenCV 4.x+ requires enabled C++11 support
+                cppFlags "-std=c++11"
+                abiFilters "armeabi-v7a"
+                arguments "-DANDROID_STL=c++_shared"
             }
         }
+//        ndk {
+//            abiFilters 'armeabi-v7a'
+//        }
     }
     buildTypes {
         release {
@@ -37,4 +44,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation project(path: ':opencv')
 }
