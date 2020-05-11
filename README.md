@@ -109,6 +109,16 @@ android {
 
 然后在“项目结构视图”中将该库作用`app`的依赖。
 
+`OpenCV`提供的人脸识别默认采用的是后置摄像头，可以在`onCreate()`方法中添加如下代码，即可实现前置摄像头的使用：  
+
+```java
+//0:后置摄像头 1:前置摄像头
+mOpenCvCameraView.setCameraIndex(1);
+mOpenCvCameraView.enableView();
+```
+
+
+
 ## 二、采坑  
 
 ### 2.1 `DetectionBasedTracker_jni.cpp`文件警告
