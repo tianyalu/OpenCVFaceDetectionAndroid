@@ -12,16 +12,15 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-//                cppFlags ""
                 //OpenCV 4.x+ requires enabled C++11 support
                 cppFlags "-std=c++11"
                 abiFilters "armeabi-v7a"
                 arguments "-DANDROID_STL=c++_shared"
             }
         }
-//        ndk {
-//            abiFilters 'armeabi-v7a'
-//        }
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
     }
     buildTypes {
         release {

@@ -65,6 +65,7 @@ struct DetectorAgregator
     }
 };
 
+extern "C"
 JNIEXPORT jlong JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeCreateObject
 (JNIEnv * jenv, jclass, jstring jFileName, jint faceSize)
 {
@@ -108,6 +109,7 @@ JNIEXPORT jlong JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker
     return result;
 }
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeDestroyObject
 (JNIEnv * jenv, jclass, jlong thiz)
 {
@@ -138,6 +140,7 @@ JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeDestroyObject exit");
 }
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeStart
 (JNIEnv * jenv, jclass, jlong thiz)
 {
@@ -164,6 +167,7 @@ JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeStart exit");
 }
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeStop
 (JNIEnv * jenv, jclass, jlong thiz)
 {
@@ -190,6 +194,7 @@ JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeStop exit");
 }
 
+extern "C"
 JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeSetFaceSize
 (JNIEnv * jenv, jclass, jlong thiz, jint faceSize)
 {
@@ -220,7 +225,7 @@ JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_
     LOGD("Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeSetFaceSize -- END");
 }
 
-
+extern "C"
 JNIEXPORT void JNICALL Java_org_opencv_samples_facedetect_DetectionBasedTracker_nativeDetect
 (JNIEnv * jenv, jclass, jlong thiz, jlong imageGray, jlong faces)
 {

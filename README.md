@@ -109,3 +109,51 @@ android {
 
 然后在“项目结构视图”中将该库作用`app`的依赖。
 
+## 二、采坑  
+
+### 2.1 `DetectionBasedTracker_jni.cpp`文件警告
+
+警告信息如下：  
+
+```bash
+To make sure the C++ compiler uses unmodified names when calling functions in your C code,list your C functions in your C++ code usinng extern "C".
+```
+
+解决方案：
+
+如警告所建议，在方法前添加`extern "C"`。  
+
+### 2.3 `Package not found`
+
+运行显示提示框：  
+
+```bash
+OpenCV Manager package was not found! Try to install it?
+```
+
+原因：动态库没有真正生成。  
+
+解决方案：  修改`app`目录下的`gradle`文件
+
+```groovy
+defaultConfig {
+  applicationId "com.sty.opencv.facedetection.android"
+  minSdkVersion 19
+  targetSdkVersion 28
+  versionCode 1
+  versionName "1.0"
+  testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  externalNativeBuild {
+    cmake {
+      //OpenCV 4.x+ requires enabled C++11 support
+      cppFlags "-std=c++11"
+      abiFilters "armeabi-v7a"
+      arguments "-DANDROID_STL=c++_shared"
+    }
+  }
+  ndk {
+    abiFilters 'armeabi-v7a'
+  }
+}
+```
+
