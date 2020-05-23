@@ -143,7 +143,7 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         //遍历
         while (iterator.hasNext()) {
             Camera.Size next = iterator.next();
-            Log.i(TAG, "遍历支持： " + next.width + " x " + next.height);
+//            Log.i(TAG, "遍历支持： " + next.width + " x " + next.height);
             int n = Math.abs(next.height * next.width - mWidth * mHeight);
             if (n < m) {
                 m = n;
