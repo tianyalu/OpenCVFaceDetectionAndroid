@@ -94,7 +94,8 @@ public class FdActivity extends CameraActivity implements CvCameraViewListener2 
                         mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
 
                         try {
-                            //Deletes the file or directory denoted by this abstract pathname. If this pathname denotes a directory, then the directory must be empty in order to be deleted.
+                            //Deletes the file or directory denoted by this abstract pathname.
+                            //If this pathname denotes a directory, then the directory must be empty in order to be deleted.
                             boolean ret = cascadeDir.delete();
                         }catch (Exception e) {
                             e.printStackTrace();

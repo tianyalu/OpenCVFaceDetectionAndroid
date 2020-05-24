@@ -2,6 +2,7 @@ package com.sty.opencv.facedetection.android;
 
 import android.app.Activity;
 import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.Surface;
@@ -48,12 +49,14 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         this.mSurfaceHolder.addCallback(this);
     }
 
+    //虽然执行了setPreviewOrientation(parameters)，屏幕中的图像正常了
+    //但此时回调中data中的数据仍然是没有旋转过的
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.i(TAG, "onPreviewFrame");
         switch (mRotation) {
             case Surface.ROTATION_0:
-                rotation90(data);
+                //rotation90(data);
                 break;
             case Surface.ROTATION_90: //横屏，左边是头部（home键在右边）
                 break;
@@ -64,8 +67,9 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         }
         if (mPreviewCallback != null) {
             mPreviewCallback.onPreviewFrame(cameraBuffer_, camera);
+//            mPreviewCallback.onPreviewFrame(cameraBuffer, camera);
         }
-        camera.addCallbackBuffer(cameraBuffer);
+//        camera.addCallbackBuffer(cameraBuffer);
     }
 
     @Override
@@ -83,10 +87,12 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
         Log.i(TAG, "surfaceChanged");
+
         //释放摄像头
         stopPreview();
         //开启摄像头
         startPreview();
+        setSurface(surfaceHolder.getSurface());
     }
 
     /**
@@ -117,11 +123,13 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
             //设置摄像头图像传感器的角度、方向
             setPreviewOrientation(parameters);
             mCamera.setParameters(parameters);
+            //可以看出无论是哪种排列方式，YUV420的数据量都为: wh+w/2h/2+w/2h/2 即为wh*3/2
+            //参考：[NV21与I420](https://www.jianshu.com/p/9ad01d4f824c)
             cameraBuffer = new byte[mWidth * mHeight * 3 / 2];
             cameraBuffer_ = new byte[mWidth * mHeight * 3 / 2];
             //数据缓冲区
-//            mCamera.addCallbackBuffer(cameraBuffer);
-//            mCamera.setPreviewCallbackWithBuffer(this);  //onPreviewFrame()
+            mCamera.addCallbackBuffer(cameraBuffer);
+            mCamera.setPreviewCallbackWithBuffer(this);  //onPreviewFrame()
             //设置预览画面
             mCamera.setPreviewDisplay(mSurfaceHolder);
             //开启预览
@@ -225,6 +233,20 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         startPreview();
     }
 
+    public int getmCameraID() {
+        return mCameraID;
+    }
+
+    public int getmWidth() {
+        return mWidth;
+    }
+
+    public int getmHeight() {
+        return mHeight;
+    }
+
+    //参考：[NV21与I420](https://www.jianshu.com/p/9ad01d4f824c)
+    //这里仅仅是旋转或旋转+镜像操作，并没有将NV21转为I420
     private void rotation90(byte[] data) {
         int index = 0;
         int ySize = mWidth * mHeight;
@@ -292,4 +314,12 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
     public interface OnChangedSizeListener {
         void onChanged(int w, int h);
     }
+
+
+    /**
+     * 设置画布
+     *  ANativeWindow
+     * @param surface
+     */
+    native void setSurface(Surface surface);
 }
