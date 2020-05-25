@@ -49,14 +49,22 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         this.mSurfaceHolder.addCallback(this);
     }
 
-    //虽然执行了setPreviewOrientation(parameters)，屏幕中的图像正常了
-    //但此时回调中data中的数据仍然是没有旋转过的
+    //
+    //
+
+    /**
+     * 虽然执行了setPreviewOrientation(parameters)，屏幕中的图像正常了
+     * 但此时回调中data中的数据仍然是没有旋转过的
+     * 这里不做旋转，放在native层人脸检测的时候再旋转
+     * @param data
+     * @param camera
+     */
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.i(TAG, "onPreviewFrame");
         switch (mRotation) {
             case Surface.ROTATION_0:
-                //rotation90(data);
+//                rotation90(data);
                 break;
             case Surface.ROTATION_90: //横屏，左边是头部（home键在右边）
                 break;
@@ -66,10 +74,10 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
                 break;
         }
         if (mPreviewCallback != null) {
-            mPreviewCallback.onPreviewFrame(cameraBuffer_, camera);
-//            mPreviewCallback.onPreviewFrame(cameraBuffer, camera);
+//            mPreviewCallback.onPreviewFrame(cameraBuffer_, camera);
+            mPreviewCallback.onPreviewFrame(cameraBuffer, camera);
         }
-//        camera.addCallbackBuffer(cameraBuffer);
+        camera.addCallbackBuffer(cameraBuffer);
     }
 
     @Override
@@ -131,7 +139,10 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
             mCamera.addCallbackBuffer(cameraBuffer);
             mCamera.setPreviewCallbackWithBuffer(this);  //onPreviewFrame()
             //设置预览画面
-            mCamera.setPreviewDisplay(mSurfaceHolder);
+//            mCamera.setPreviewDisplay(mSurfaceHolder);
+            //设置预览画面
+            SurfaceTexture surfaceTexture = new SurfaceTexture(11);
+            mCamera.setPreviewTexture(surfaceTexture);
             //开启预览
             mCamera.startPreview();
         } catch (Exception e) {

@@ -12,11 +12,13 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.sty.opencv.facedetection.android.util.PermissionUtils;
 
+import org.opencv.core.Mat;
 import org.opencv.samples.facedetect.FdActivity;
 
 import java.io.File;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
 
         copyCascadeFile();
@@ -54,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
             cameraHelper.setPreviewCallback(new Camera.PreviewCallback() {
                 @Override
                 public void onPreviewFrame(byte[] data, Camera camera) {
-                    byte[] data_ = getFacedData(data, cameraHelper.getmWidth(), cameraHelper.getmHeight(), cameraHelper.getmCameraID());
-                    camera.addCallbackBuffer(data_);
+                    getFaceData(data, cameraHelper.getmWidth(), cameraHelper.getmHeight(), cameraHelper.getmCameraID());
+//                    camera.addCallbackBuffer(data);
                 }
             });
         }
@@ -144,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
      * @return
      */
     public native byte[] getFacedData(byte[] data, int w, int h, int cameraId);
+
+    public native void getFaceData(byte[] data, int w, int h, int cameraId);
 
     /**
      * 释放追踪器
