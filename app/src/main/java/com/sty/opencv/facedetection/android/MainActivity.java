@@ -30,47 +30,59 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private String[] needPermissions = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
     private SurfaceView surfaceView;
+    private SurfaceView preview;
+    private SurfaceView face;
     private Button btnSwitchCamera;
     private Button btnDetect;
     private CameraHelper cameraHelper;
+    private MyOpenCVHelper myOpenCVHelper;
 
     private File mCascadeFile;
 
-    static {
-        System.loadLibrary("native-lib");
-    }
+//    static {
+//        System.loadLibrary("native-lib");
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.activity_main);
 
         copyCascadeFile();
-        initViews();
+
 
         if(!PermissionUtils.checkPermissions(this, needPermissions)) {
             PermissionUtils.requestPermissions(this, needPermissions);
         }else {
-            initTracker(mCascadeFile.getAbsolutePath());
-            cameraHelper.rePreview();
-            cameraHelper.setPreviewCallback(new Camera.PreviewCallback() {
-                @Override
-                public void onPreviewFrame(byte[] data, Camera camera) {
-                    getFaceData(data, cameraHelper.getmWidth(), cameraHelper.getmHeight(), cameraHelper.getmCameraID());
-//                    camera.addCallbackBuffer(data);
-                }
-            });
+            initViews();
+//            initTracker(mCascadeFile.getAbsolutePath());
+//            cameraHelper.rePreview();
+//            cameraHelper.setPreviewCallback(new Camera.PreviewCallback() {
+//                @Override
+//                public void onPreviewFrame(byte[] data, Camera camera) {
+//                    getFaceData(data, cameraHelper.getmWidth(), cameraHelper.getmHeight(), cameraHelper.getmCameraID());
+////                    camera.addCallbackBuffer(data);
+//                }
+//            });
         }
     }
 
     private void initViews() {
         surfaceView = findViewById(R.id.surface_view);
+        preview = findViewById(R.id.preview);
+        face = findViewById(R.id.face);
         btnSwitchCamera = findViewById(R.id.btn_switch_camera);
         btnDetect = findViewById(R.id.btn_detect);
 
-        cameraHelper = new CameraHelper(MainActivity.this);
-        cameraHelper.setPreviewDisplay(surfaceView.getHolder());
+//        cameraHelper = new CameraHelper(MainActivity.this);
+//        cameraHelper.setPreviewDisplay(surfaceView.getHolder());
+
+        myOpenCVHelper = new MyOpenCVHelper(this);
+        myOpenCVHelper.initNative(mCascadeFile.getAbsolutePath());
+        myOpenCVHelper.setSurfacePreview(face.getHolder());
+        myOpenCVHelper.createCamera(preview.getHolder());
 
 
         btnSwitchCamera.setOnClickListener(new View.OnClickListener() {
@@ -125,8 +137,9 @@ public class MainActivity extends AppCompatActivity {
             if(!PermissionUtils.verifyPermissions(grantResults)) {
                 PermissionUtils.showMissingPermissionDialog(this);
             }else {
-                cameraHelper.rePreview();
-                initTracker(mCascadeFile.getAbsolutePath());
+//                cameraHelper.rePreview();
+//                initTracker(mCascadeFile.getAbsolutePath());
+                initViews();
             }
         }
     }

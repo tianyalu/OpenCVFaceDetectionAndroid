@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
     tools:context=".MainActivity">
 
     <SurfaceView
         android:id="@+id/surface_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:visibility="gone">
         <Button
             android:id="@+id/btn_switch_camera"
             android:layout_width="wrap_content"
@@ -29,4 +33,27 @@
             android:text="goto detect"
             android:textAllCaps="false"/>
     </LinearLayout>
-</RelativeLayout>
+
+
+<!--    <SurfaceView-->
+<!--        android:id="@+id/preview"-->
+<!--        android:layout_width="240dp"-->
+<!--        android:layout_height="320dp"/>-->
+
+<!--    <SurfaceView-->
+<!--        android:id="@+id/face"-->
+<!--        android:layout_width="240dp"-->
+<!--        android:layout_height="320dp"-->
+<!--        android:layout_marginTop="10dp"/>-->
+
+    <SurfaceView
+        android:id="@+id/preview"
+        android:layout_width="220dp"
+        android:layout_height="280dp"/>
+
+    <SurfaceView
+        android:id="@+id/face"
+        android:layout_width="220dp"
+        android:layout_height="280dp"
+        android:layout_marginTop="10dp"/>
+</LinearLayout>

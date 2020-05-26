@@ -1,39 +1,18 @@
 #include <jni.h>
 #include <string>
-#include <opencv2/opencv.hpp>
-#include <android/log.h>
 #include <android/native_window_jni.h>
+#include "MyOpenCVHelper.h"
 
-using namespace cv;
+
 
 DetectionBasedTracker *tracker = 0;
 std::vector<Rect> last_faces;
-ANativeWindow *window = 0;
 
-class CascadeDetectorAdapter : public DetectionBasedTracker::IDetector
-{
-public:
-    CascadeDetectorAdapter(cv::Ptr<cv::CascadeClassifier> detector) :
-            IDetector(),
-            Detector(detector)
-    {
-        CV_Assert(detector);
-    }
+ANativeWindow *window = nullptr;
+MyOpenCVHelper *myOpenCvHelper = nullptr;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; //静态初始化
 
-    void detect(const cv::Mat& Image, std::vector<cv::Rect>& objects)
-    {
-        Detector->detectMultiScale(Image, objects, scaleFactor, minNeighbours, 0, minObjSize, maxObjSize);
-    }
-
-    virtual ~CascadeDetectorAdapter()
-    {
-
-    }
-
-private:
-    CascadeDetectorAdapter();
-    cv::Ptr<cv::CascadeClassifier> Detector;
-};
+void renderFrame(uint8_t *rgba, int width, int height);
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -54,8 +33,7 @@ Java_com_sty_opencv_facedetection_android_MainActivity_initTracker(JNIEnv *env, 
             makePtr<CascadeClassifier>(cascade_file));
     //创建跟踪器
     DetectionBasedTracker::Parameters DetectorParams;
-//    tracker = makePtr<DetectionBasedTracker>(mainDetector, trackingDetector, DetectorParams);
-    tracker = new DetectionBasedTracker(mainDetector, trackingDetector, DetectorParams);
+    tracker = makePtr<DetectionBasedTracker>(mainDetector, trackingDetector, DetectorParams);
     //启动跟踪器
     tracker->run();
 
@@ -264,4 +242,88 @@ Java_com_sty_opencv_facedetection_android_MainActivity_getFaceData(JNIEnv *env, 
 
     gray.release();
     env->ReleaseByteArrayElements(data_, data, 0);
+}
+
+//初始化，人脸模型路径
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_sty_opencv_facedetection_android_MyOpenCVHelper_initNative(JNIEnv *env, jobject thiz,
+                                                                    jstring face_model_path_) {
+    const char *path = env->GetStringUTFChars(face_model_path_, 0);
+
+    if(!myOpenCvHelper) {
+        myOpenCvHelper = new MyOpenCVHelper(path);
+        myOpenCvHelper->initDetectorTracker();
+    }
+
+    env->ReleaseStringUTFChars(face_model_path_, path);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_sty_opencv_facedetection_android_MyOpenCVHelper_setSurfaceNative(JNIEnv *env, jobject thiz,
+                                                                          jobject surface) {
+    pthread_mutex_lock(&mutex);
+    //先移除之前的window
+    if(window) {
+        ANativeWindow_release(window);
+        window = nullptr;
+    }
+    //创建新的window
+    window = ANativeWindow_fromSurface(env, surface);
+    pthread_mutex_unlock(&mutex);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_sty_opencv_facedetection_android_MyOpenCVHelper_renderFrameNative(JNIEnv *env,
+                                                                           jobject thiz,
+                                                                           jbyteArray bytes,
+                                                                           jint width,
+                                                                           jint height) {
+    jbyte *yuv = env->GetByteArrayElements(bytes, 0);
+
+    //NV21转rgb（网上找的一个算法）
+    uint8_t *rgb = myOpenCvHelper->nv21ToRgb(reinterpret_cast<uint8_t *>(yuv), width, height);
+    //rgb转mat
+    Mat frame = myOpenCvHelper->rgb2Mat(rgb, width, height);
+    myOpenCvHelper->dynamicFaceDetect(frame);
+    //mat转rgb
+    rgb = myOpenCvHelper->mat2rgb(frame, 0);
+    //rgb转rgba
+    uint8_t *rgba = myOpenCvHelper->rgb2rgba(rgb, width, height, 50);
+    //渲染
+    renderFrame(rgba, width, height);
+
+    env->ReleaseByteArrayElements(bytes, yuv, 0);
+}
+
+void renderFrame(uint8_t *rgba, int width, int height) {
+    pthread_mutex_lock(&mutex);
+    if(!window) {
+        pthread_mutex_unlock(&mutex);
+        return;
+    }
+    //初始化窗口属性
+    //注意：这里的宽高是指 图像的宽高
+    ANativeWindow_setBuffersGeometry(window, width, height, WINDOW_FORMAT_RGBA_8888);
+    ANativeWindow_Buffer buffer;
+    if(ANativeWindow_lock(window, &buffer, nullptr)) {
+        ANativeWindow_release(window);
+        window = nullptr;
+        return;
+    }
+    uint8_t *windowData = static_cast<uint8_t *>(buffer.bits);
+
+    //原始数据中一行的rgba图像的字节数
+    int lineSize = width * 4;
+    //窗口中一行图像的字节数
+    int windowDataLineSize = buffer.stride * 4;
+    //内存拷贝，逐行拷贝
+    for (int i = 0; i < buffer.height; ++i) {
+        memcpy(windowData + i * windowDataLineSize, rgba + i * lineSize, windowDataLineSize);
+    }
+
+    ANativeWindow_unlockAndPost(window);
+    pthread_mutex_unlock(&mutex);
 }

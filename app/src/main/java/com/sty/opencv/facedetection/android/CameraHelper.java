@@ -2,7 +2,6 @@ package com.sty.opencv.facedetection.android;
 
 import android.app.Activity;
 import android.graphics.ImageFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.Surface;
@@ -20,13 +19,14 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
     private int mWidth;
     private int mHeight;
     private byte[] cameraBuffer;
-    private byte[] cameraBuffer_;
+    private byte[] rotatedCameraBuffer;
 
     private Activity mActivity;
     private SurfaceHolder mSurfaceHolder;
     private Camera mCamera;
 
-    private Camera.PreviewCallback mPreviewCallback;
+//    private Camera.PreviewCallback mPreviewCallback;
+    private PreviewCallback mPreviewCallback;
     private OnChangedSizeListener mOnChangedSizeListener;
     private int mRotation;
 
@@ -37,6 +37,11 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         this.mActivity = activity;
     }
 
+    public CameraHelper(Activity activity, SurfaceHolder surfaceHolder) {
+        this(activity);
+        setPreviewDisplay(surfaceHolder);
+    }
+
     public CameraHelper(int mCameraID, int mWidth, int mHeight, Activity mActivity) {
         this.mCameraID = mCameraID;
         this.mWidth = mWidth;
@@ -45,12 +50,14 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
     }
 
     public void setPreviewDisplay(SurfaceHolder surfaceHolder) {
+        if(this.mSurfaceHolder != null) {
+            this.mSurfaceHolder.removeCallback(this);
+            this.mSurfaceHolder = null;
+        }
         this.mSurfaceHolder = surfaceHolder;
         this.mSurfaceHolder.addCallback(this);
     }
 
-    //
-    //
 
     /**
      * 虽然执行了setPreviewOrientation(parameters)，屏幕中的图像正常了
@@ -64,7 +71,7 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         Log.i(TAG, "onPreviewFrame");
         switch (mRotation) {
             case Surface.ROTATION_0:
-//                rotation90(data);
+                rotation90(data);
                 break;
             case Surface.ROTATION_90: //横屏，左边是头部（home键在右边）
                 break;
@@ -74,10 +81,9 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
                 break;
         }
         if (mPreviewCallback != null) {
-//            mPreviewCallback.onPreviewFrame(cameraBuffer_, camera);
-            mPreviewCallback.onPreviewFrame(cameraBuffer, camera);
+            mPreviewCallback.onPreviewFrame(rotatedCameraBuffer);
         }
-        camera.addCallbackBuffer(cameraBuffer);
+        camera.addCallbackBuffer(cameraBuffer); //这句代码很重要，去掉后回调回中断
     }
 
     @Override
@@ -100,7 +106,6 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         stopPreview();
         //开启摄像头
         startPreview();
-        setSurface(surfaceHolder.getSurface());
     }
 
     /**
@@ -134,15 +139,12 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
             //可以看出无论是哪种排列方式，YUV420的数据量都为: wh+w/2h/2+w/2h/2 即为wh*3/2
             //参考：[NV21与I420](https://www.jianshu.com/p/9ad01d4f824c)
             cameraBuffer = new byte[mWidth * mHeight * 3 / 2];
-            cameraBuffer_ = new byte[mWidth * mHeight * 3 / 2];
+            rotatedCameraBuffer = new byte[mWidth * mHeight * 3 / 2];
             //数据缓冲区
             mCamera.addCallbackBuffer(cameraBuffer);
             mCamera.setPreviewCallbackWithBuffer(this);  //onPreviewFrame()
             //设置预览画面
-//            mCamera.setPreviewDisplay(mSurfaceHolder);
-            //设置预览画面
-            SurfaceTexture surfaceTexture = new SurfaceTexture(11);
-            mCamera.setPreviewTexture(surfaceTexture);
+            mCamera.setPreviewDisplay(mSurfaceHolder);
             //开启预览
             mCamera.startPreview();
         } catch (Exception e) {
@@ -268,7 +270,7 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
             //将y的数据转换后放入新的byte数组
             for (int i = 0; i < mWidth; i++) {
                 for (int j = mHeight - 1; j >= 0; j--) {
-                    cameraBuffer_[index++] = data[mWidth * j + i];
+                    rotatedCameraBuffer[index++] = data[mWidth * j + i];
                 }
             }
 
@@ -276,45 +278,45 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
             for (int i = 0; i < mWidth; i += 2) {
                 for (int j = uvHeight - 1; j >= 0; j--) {
                     //v
-                    cameraBuffer_[index++] = data[ySize + mWidth * j + i];
+                    rotatedCameraBuffer[index++] = data[ySize + mWidth * j + i];
                     //u
-                    cameraBuffer_[index++] = data[ySize + mWidth * j + i + 1];
+                    rotatedCameraBuffer[index++] = data[ySize + mWidth * j + i + 1];
                 }
             }
         }else {
             //逆时针旋转90度
 //            for (int i = 0; i < mWidth; i++) {
 //                for (int j = 0; j < mHeight; j++) {
-//                    cameraBuffer_[index++] = data[mWidth * j + mWidth - 1 - i];
+//                    rotatedCameraBuffer[index++] = data[mWidth * j + mWidth - 1 - i];
 //                }
 //            }
 //            //  u v
 //            for (int i = 0; i < mWidth; i += 2) {
 //                for (int j = 0; j < uvHeight; j++) {
-//                    cameraBuffer_[index++] = data[ySize + mWidth * j + mWidth - 1 - i - 1];
-//                    cameraBuffer_[index++] = data[ySize + mWidth * j + mWidth - 1 - i];
+//                    rotatedCameraBuffer[index++] = data[ySize + mWidth * j + mWidth - 1 - i - 1];
+//                    rotatedCameraBuffer[index++] = data[ySize + mWidth * j + mWidth - 1 - i];
 //                }
 //            }
 
             //旋转并镜像
             for (int i = 0; i < mWidth; i++) {
                 for (int j = mHeight - 1; j >= 0; j--) {
-                    cameraBuffer_[index++] = data[mWidth * j + mWidth -1 -i];
+                    rotatedCameraBuffer[index++] = data[mWidth * j + mWidth -1 -i];
                 }
             }
             // u v
             for (int i = 0; i < mWidth; i += 2) {
                 for (int j = uvHeight -1; j >= 0; j--) {
                     //v
-                    cameraBuffer_[index++] = data[ySize + mWidth * j + mWidth -1 -i -1];
+                    rotatedCameraBuffer[index++] = data[ySize + mWidth * j + mWidth -1 -i -1];
                     //u
-                    cameraBuffer_[index++] = data[ySize + mWidth * j + mWidth -1 -i];
+                    rotatedCameraBuffer[index++] = data[ySize + mWidth * j + mWidth -1 -i];
                 }
             }
         }
     }
 
-    public void setPreviewCallback(Camera.PreviewCallback previewCallback) {
+    public void setPreviewCallback(PreviewCallback previewCallback) {
         this.mPreviewCallback = previewCallback;
     }
 
@@ -322,15 +324,18 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         this.mOnChangedSizeListener = listener;
     }
 
+    /**
+     * surface大小发生改变回调接口，
+     * 当其大小发生改变时数据的编码参数会发生改变，所以需要回调最后通知底层
+     */
     public interface OnChangedSizeListener {
         void onChanged(int w, int h);
     }
 
-
     /**
-     * 设置画布
-     *  ANativeWindow
-     * @param surface
+     * 数据预览回调，当获取到摄像头数据时回调出去，再通过底层把数据封装推流
      */
-    native void setSurface(Surface surface);
+    public interface PreviewCallback {
+        public void onPreviewFrame(byte[] bytes);
+    }
 }
