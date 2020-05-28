@@ -2,8 +2,16 @@
 
 [TOC]
 
-## 一、实现步骤
+## 写在前面
+本文的实现思路是基于`OpenCV`库实现人脸检测，首先集成底层so动态库及头文件等，然后集成`OpenCV`的`Java`模块，当做`lib`库使用，实现的效果也是`Samples`文件中的，对于手机而言，没有旋转，甚是别扭。项目中`goto detect`按键实现的就是这种效果。本文正文介绍的也是这种方式。
 
+然后想实现正常的预览视角，抛弃`OpenCV`的`Java`模块，此时遇到的问题主要有预览视图的旋转设置，回调后`buffer`数据的旋转，然后摄像头`NV21`数据格式转成`RGB`格式，流数据格式转`Mat`，调用人脸识别，画人脸矩形框，将带人脸框的数据渲染到`SurfaceView`等等。此种方式本文有实现，此种方式`1.2.2`和`1.2.7`便无需再参考了。
+
+这里各种数据格式的转换是参考别人网上找的算法，然后实现`RGB`与`YUV`之间的转换还可以借助`libyuv`这个库(我自己目前还没有实践，有空了要试一下)，官网地址为：[https://chromium.googlesource.com/libyuv/libyuv](https://chromium.googlesource.com/libyuv/libyuv) 
+但是因为是Google的库，需要翻墙，这里可以曲线救国，从`GitHub`上下载：[https://github.com/lemenkov/libyuv](https://github.com/lemenkov/libyuv)
+可以参考[Android音视频——Libyuv使用实战](https://www.jianshu.com/p/9e062ba44a83)
+
+## 一、实现步骤
 ### 1.1 下载OpenCV
 
 去 [`OpenCV`官网](https://opencv.org/releases/) 下载合适的 **`Android`** 版本并解压，这里以`OpenCV-4.1.2`为例。  

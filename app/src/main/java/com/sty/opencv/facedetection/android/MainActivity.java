@@ -39,9 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
     private File mCascadeFile;
 
-//    static {
-//        System.loadLibrary("native-lib");
-//    }
+    static {
+        System.loadLibrary("native-lib");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,15 +57,6 @@ public class MainActivity extends AppCompatActivity {
             PermissionUtils.requestPermissions(this, needPermissions);
         }else {
             initViews();
-//            initTracker(mCascadeFile.getAbsolutePath());
-//            cameraHelper.rePreview();
-//            cameraHelper.setPreviewCallback(new Camera.PreviewCallback() {
-//                @Override
-//                public void onPreviewFrame(byte[] data, Camera camera) {
-//                    getFaceData(data, cameraHelper.getmWidth(), cameraHelper.getmHeight(), cameraHelper.getmCameraID());
-////                    camera.addCallbackBuffer(data);
-//                }
-//            });
         }
     }
 
@@ -88,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
         btnSwitchCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                cameraHelper.switchCamera();
+//                cameraHelper.switchCamera();
+                myOpenCVHelper.switchCamera();
             }
         });
 
@@ -103,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        initTracker(mCascadeFile.getAbsolutePath());
     }
 
     private void copyCascadeFile() {
@@ -111,9 +102,12 @@ public class MainActivity extends AppCompatActivity {
             // load cascade file from application resources
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
-//            if(mCascadeFile.exists()) {
-//                return;
-//            }
+
+            if(mCascadeFile.exists()) {
+                Log.i(TAG, "mCascadeFile is exists");
+                return;
+            }
+            Log.i(TAG, "mCascadeFile is not exists");
             InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
             FileOutputStream os = new FileOutputStream(mCascadeFile);
 
@@ -138,34 +132,9 @@ public class MainActivity extends AppCompatActivity {
                 PermissionUtils.showMissingPermissionDialog(this);
             }else {
 //                cameraHelper.rePreview();
-//                initTracker(mCascadeFile.getAbsolutePath());
                 initViews();
             }
         }
     }
-
-    /**
-     * 初始化追踪器
-     * @param cascadeFile
-     */
-    public native void initTracker(String cascadeFile);
-
-
-    /**
-     * 得到画出人脸图像的数据
-     * @param data
-     * @param w
-     * @param h
-     * @param cameraId
-     * @return
-     */
-    public native byte[] getFacedData(byte[] data, int w, int h, int cameraId);
-
-    public native void getFaceData(byte[] data, int w, int h, int cameraId);
-
-    /**
-     * 释放追踪器
-     */
-    public native void releaseTracker();
 
 }

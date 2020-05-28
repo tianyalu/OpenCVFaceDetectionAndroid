@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -16,44 +16,37 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+        <SurfaceView
+            android:id="@+id/preview"
+            android:layout_width="210dp"
+            android:layout_height="280dp"/>
+
+        <SurfaceView
+            android:id="@+id/face"
+            android:layout_width="210dp"
+            android:layout_height="280dp"
+            android:layout_marginTop="10dp"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:visibility="gone">
+        android:visibility="visible">
         <Button
             android:id="@+id/btn_switch_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="切换摄像头"/>
+            android:text="切换摄像头" />
 
         <Button
             android:id="@+id/btn_detect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="goto detect"
-            android:textAllCaps="false"/>
-    </LinearLayout>
-
-
-<!--    <SurfaceView-->
-<!--        android:id="@+id/preview"-->
-<!--        android:layout_width="240dp"-->
-<!--        android:layout_height="320dp"/>-->
-
-<!--    <SurfaceView-->
-<!--        android:id="@+id/face"-->
-<!--        android:layout_width="240dp"-->
-<!--        android:layout_height="320dp"-->
-<!--        android:layout_marginTop="10dp"/>-->
-
-    <SurfaceView
-        android:id="@+id/preview"
-        android:layout_width="220dp"
-        android:layout_height="280dp"/>
-
-    <SurfaceView
-        android:id="@+id/face"
-        android:layout_width="220dp"
-        android:layout_height="280dp"
-        android:layout_marginTop="10dp"/>
-</LinearLayout>
+            android:textAllCaps="false"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+</FrameLayout>

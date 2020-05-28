@@ -12,8 +12,10 @@ import java.util.List;
 
 public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callback {
     private static final String TAG = CameraHelper.class.getSimpleName();
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 480;
+//    private static final int WIDTH = 800;
+//    private static final int HEIGHT = 480;
+    private static final int WIDTH = 560;
+    private static final int HEIGHT = 420;
     private static final int CAMERA_ID = Camera.CameraInfo.CAMERA_FACING_FRONT;
     private int mCameraID;
     private int mWidth;
@@ -83,7 +85,8 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
         if (mPreviewCallback != null) {
             mPreviewCallback.onPreviewFrame(rotatedCameraBuffer);
         }
-        camera.addCallbackBuffer(cameraBuffer); //这句代码很重要，去掉后回调回中断
+        camera.addCallbackBuffer(cameraBuffer); //这句代码很重要，去掉后会调回中断
+
     }
 
     @Override
@@ -336,6 +339,6 @@ public class CameraHelper implements Camera.PreviewCallback, SurfaceHolder.Callb
      * 数据预览回调，当获取到摄像头数据时回调出去，再通过底层把数据封装推流
      */
     public interface PreviewCallback {
-        public void onPreviewFrame(byte[] bytes);
+        void onPreviewFrame(byte[] bytes);
     }
 }

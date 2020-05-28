@@ -3,17 +3,13 @@ package com.sty.opencv.facedetection.android;
 import android.app.Activity;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MyOpenCVHelper implements CameraHelper.PreviewCallback, CameraHelper.OnChangedSizeListener
         , SurfaceHolder.Callback {
 
-    static {
-        System.loadLibrary("native-lib");
-    }
+//    static {
+//        System.loadLibrary("native-lib");
+//    }
 
     private static final String TAG = MyOpenCVHelper.class.getSimpleName();
     private CameraHelper cameraHelper;
@@ -21,11 +17,9 @@ public class MyOpenCVHelper implements CameraHelper.PreviewCallback, CameraHelpe
     private Activity activity;
     private int width;
     private int height;
-    private ExecutorService singleExecutorService; //单线程池
 
     public MyOpenCVHelper(Activity activity) {
         this.activity = activity;
-        singleExecutorService = Executors.newSingleThreadExecutor();
     }
 
 
@@ -41,6 +35,12 @@ public class MyOpenCVHelper implements CameraHelper.PreviewCallback, CameraHelpe
         }
         this.surfaceHolder = surfaceHolder;
         this.surfaceHolder.addCallback(this);
+    }
+
+    public void switchCamera() {
+        if(cameraHelper != null) {
+            cameraHelper.switchCamera();
+        }
     }
 
     //surface创建回调
