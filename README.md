@@ -9,7 +9,11 @@
 
 这里各种数据格式的转换是参考别人网上找的算法，然后实现`RGB`与`YUV`之间的转换还可以借助`libyuv`这个库(我自己目前还没有实践，有空了要试一下)，官网地址为：[https://chromium.googlesource.com/libyuv/libyuv](https://chromium.googlesource.com/libyuv/libyuv) 
 但是因为是Google的库，需要翻墙，这里可以曲线救国，从`GitHub`上下载：[https://github.com/lemenkov/libyuv](https://github.com/lemenkov/libyuv)
-可以参考[Android音视频——Libyuv使用实战](https://www.jianshu.com/p/9e062ba44a83)
+可以参考[Android音视频——Libyuv使用实战](https://www.jianshu.com/p/9e062ba44a83)。  
+
+先来个效果图一睹为快吧：  
+
+![image](https://github.com/tianyalu/OpenCVFaceDetectionAndroid/raw/master/show/show.gif)  
 
 ## 一、实现步骤
 ### 1.1 下载OpenCV
